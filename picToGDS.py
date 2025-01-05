@@ -32,6 +32,9 @@ def main(fileName, sizeOfTheCell, layerNum, isDither, scale):
     # Convert an image to grayscale one
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
+    gpu_img = cv2.cuda_GpuMat()
+    gpu_img.upload(gray)
+    
     if(isDither):
         # Floyd–Steinberg dithering
         # https://en.wikipedia.org/wiki/Floyd%E2%80%93Steinberg_dithering
@@ -48,7 +51,7 @@ def main(fileName, sizeOfTheCell, layerNum, isDither, scale):
         
         ret, binaryImage = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU)
     else:
-        ret, binaryImage = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU)
+        ret, binaryImage = cv2.cuda.threshold(gpu_img, 0, 255, cv2.THRESH_OTSU)
 
     # Fill orthological corner
     for x in range(width - 1):
