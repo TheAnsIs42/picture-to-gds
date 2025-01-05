@@ -7,7 +7,7 @@ import numpy as np
 import gdspy
 
 import argparse
-
+import time
 def minmax(v):
     if v > 255:
         v = 255
@@ -34,6 +34,8 @@ def main(fileName, sizeOfTheCell, layerNum, isDither, scale):
     #some prepare for CUDA
     gpu_img = cv2.cuda_GpuMat()
     gpu_img.upload(gray)
+
+    t0 = time.time()
     
     if(isDither):
         # Floyd–Steinberg dithering
@@ -52,7 +54,10 @@ def main(fileName, sizeOfTheCell, layerNum, isDither, scale):
         ret, binaryImage = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU)
     else:
         ret, binaryImage = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU)
-
+        
+    t1 = time.time()
+    Tthreshold = t1-t0
+    
     # Fill orthological corner
     for x in range(width - 1):
         for y in range(height - 1):
@@ -65,6 +70,8 @@ def main(fileName, sizeOfTheCell, layerNum, isDither, scale):
 
     # Output image.bmp
     cv2.imwrite("image.bmp", binaryImage)
+
+    t2 = time.time()
     
     # The GDSII file is called a library, which contains multiple cells.
     lib = gdspy.GdsLibrary()
@@ -91,6 +98,9 @@ def main(fileName, sizeOfTheCell, layerNum, isDither, scale):
     top = lib.new_cell("TOP")
     top.add(scaledGrid)
     lib.write_gds("image.gds")
+    
+    t3 = time.time()
+    Tgds = t3-t2
 
 
 if __name__ == "__main__":
