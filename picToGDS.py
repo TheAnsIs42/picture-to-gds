@@ -8,7 +8,6 @@ import gdspy
 
 import argparse
 
-
 def minmax(v):
     if v > 255:
         v = 255
@@ -32,6 +31,7 @@ def main(fileName, sizeOfTheCell, layerNum, isDither, scale):
     # Convert an image to grayscale one
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
+    #some prepare for CUDA
     gpu_img = cv2.cuda_GpuMat()
     gpu_img.upload(gray)
     
@@ -51,7 +51,7 @@ def main(fileName, sizeOfTheCell, layerNum, isDither, scale):
         
         ret, binaryImage = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU)
     else:
-        ret, binaryImage = cv2.cuda.threshold(gpu_img, 0, 255, cv2.THRESH_OTSU)
+        ret, binaryImage = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU)
 
     # Fill orthological corner
     for x in range(width - 1):
@@ -80,7 +80,7 @@ def main(fileName, sizeOfTheCell, layerNum, isDither, scale):
     for x in range(width):
         for y in range(height):
             if binaryImage.item(y, x) == 0:
-                print("({0}, {1}) is black".format(x, y))
+                #print("({0}, {1}) is black".format(x, y))
                 cell = gdspy.CellReference(unitCell, origin=(x, height - y - 1))
                 grid.add(cell)
 
